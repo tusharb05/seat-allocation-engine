@@ -1,0 +1,2 @@
+class LockConflictError(Exception):
+    pass

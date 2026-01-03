@@ -1,0 +1,58 @@
+services:
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - seat-network
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - seat-network
+    restart: unless-stopped
+  
+  booking-service:
+    build: ./booking-service
+    env_file:
+      - ./booking-service/.env
+    depends_on:
+      - postgres
+    ports:
+      - "8002:8000"
+    networks:
+      - seat-network
+
+  lock-service:
+    build: ./lock-service
+    container_name: lock-service
+    env_file:
+      - ./lock-service/.env
+    depends_on:
+      - redis
+    ports:
+      - "8001:8000"
+    networks:
+      - seat-network
+
+
+volumes:
+  pg_data:
+  redis_data:
+
+networks:
+  seat-network:
+    driver: bridge
