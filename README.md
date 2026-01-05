@@ -183,11 +183,11 @@ A high failure rate is expected and desired.
 
 | # | Test Name                     | What It Validates          | Seats | Users    | Ramp-up | Runtime | TTL   | Screenshot             |
 |---|------------------------------|----------------------------|-------|----------|---------|---------|-------|-------------------------|
-| 1 | Lock Contention              | Mutual exclusion           | A1    | 50       | 1/sec   | 2m      | 120s  | assets/test1.png        |
-| 2 | Lock TTL Expiry              | Lock auto-release          | A1    | 50       | 1/sec   | 1m      | 5s    | assets/test2.png        |
-| 3 | High Ramp-up Lock Race       | Atomic locking             | A1    | 50       | 10/sec  | 1m      | 5s    | assets/test3.png        |
-| 4 | Confirm Race (Single Seat)   | DB truth beats Redis       | A1    | 20       | 5/sec   | 1m      | 1s    | assets/test4.png        |
-| 5 | Confirm Race (Multi-seat)    | Atomic commit              | A2,A3 | 20       | 5/sec   | 1m      | 1s    | assets/test5.png        |
+| 1 | Lock Contention              | Mutual exclusion           | A1    | 50       | 1/sec   | 2m      | 120s  | ![](./assets/test1.png) |
+| 2 | Lock TTL Expiry              | Lock auto-release          | A1    | 50       | 1/sec   | 1m      | 5s    | ![](./assets/test2.png) |
+| 3 | High Ramp-up Lock Race       | Atomic locking             | A1    | 50       | 10/sec  | 1m      | 5s    | ![](./assets/test3.png) |
+| 4 | Confirm Race (Single Seat)   | DB truth beats Redis       | A1    | 20       | 5/sec   | 1m      | 1s    | ![](./assets/test4.png) |
+| 5 | Confirm Race (Multi-seat)    | Atomic commit              | A2,A3 | 20       | 5/sec   | 1m      | 1s    | ![](./assets/test5.png) |
 
 
 ---
