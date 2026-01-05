@@ -23,11 +23,11 @@ Postgres is the source of truth.
 ---
 
 
-### Two phase booking
+### Two stage booking
 
-The Redis phase absorbs high-concurrency bursts and filters contention early, preventing 
+The Redis stage absorbs high-concurrency bursts and filters contention early, preventing 
 concurrent race condition-causing requests from overwhelming the database. The 
-PostgreSQL phase is the final authority, enforcing durability and correctness using 
+PostgreSQL stage is the final authority, enforcing durability and correctness using 
 transactional guarantees and row-level locks. 
 
 ---
