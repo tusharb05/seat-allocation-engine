@@ -100,22 +100,6 @@ POST /booking/confirm
 }
 ```
 
-#### Inside one DB transaction:
-
-- Verify Redis locks
-
-- SELECT seats FOR UPDATE
-
-- Idempotency check
-
-- Invariant check (all seats AVAILABLE)
-
-- Mark seats BOOKED
-
-- Insert bookings
-
-- Commit
-
 #### Guarantees:
 
 - Atomic multi-seat booking
