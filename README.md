@@ -1,25 +1,10 @@
 # Seat Allocation Engine
 
-**Stack:** Redis (advisory locks (leases)), PostgreSQL (truth), FastAPI (API), Docker Compose (deployment)  
+**Stack:** Redis (advisory locks (leases)), PostgreSQL (truth), FastAPI (API)  
 **Focus:** Concurrency correctness, idempotency, atomic multi-seat booking, load-tested under race conditions.
 
 This project is intentionally backend-heavy. There is no UI, no auth, and no payments.  
 The goal is to solve **seat allocation under concurrency** correctly and prove it with load tests.
-
----
-
-## Table of Contents
-
-- [Architecture Overview](#architecture-overview)
-- [Core Design Principles](#core-design-principles)
-- [Data Model & Constraints](#data-model--constraints)
-- [Booking Flow](#booking-flow)
-- [Deployment](#deployment)
-- [Load Testing Strategy](#load-testing-strategy)
-- [Locust Tests Summary](#locust-tests-summary)
-- [Database Verification](#database-verification)
-- [Key Engineering Takeaways](#key-engineering-takeaways)
-- [Resume Highlights](#resume-highlights)
 
 ---
 
@@ -33,30 +18,17 @@ The system is split into **coordination** and **truth** layers:
 - **Docker Compose** runs everything locally in isolated containers.
 
 Redis helps reduce contention.  
-Postgres enforces correctness.
-
-If Redis lies, Postgres corrects it.
-
----
-
-## Core Design Principles
-
-1. **Redis is advisory, not authoritative**
-2. **Postgres enforces invariants**
-3. **All booking commits are transactional**
-4. **Idempotency is explicit and enforced at DB level**
-5. **High rejection rate under load is expected and correct**
-6. **No partial state is ever committed**
+Postgres is the source of truth.
 
 ---
 
 
-### Why this works
+### Two phase booking
 
-- Redis handles fast, distributed coordination.
-- PostgreSQL guarantees atomicity and consistency.
-- Row-level locks (`SELECT ... FOR UPDATE`) prevent double booking.
-- TTL prevents deadlocks if clients crash.
+The Redis phase absorbs high-concurrency bursts and filters contention early, preventing 
+concurrent race condition-causing requests from overwhelming the database. The 
+PostgreSQL phase is the final authority, enforcing durability and correctness using 
+transactional guarantees and row-level locks. 
 
 ---
 
@@ -155,33 +127,10 @@ POST /booking/confirm
 ---
 
 
-## Load Testing Strategy
-
-All load tests were done using Locust.
-
-#### Key points:
-
-- High concurrency
-
-- Short TTLs
-
-- Aggressive ramp-up
-
-- Focus on correctness, not throughput
-
-A high failure rate is expected and desired.
+## Load Testing Summary (performed with Locust)
 
 
----
-
-
-## Locust Test Summary
-
-## Locust Tests Summary
-
-
-
-| # | Test Name                     | What It Validates          | Seats | Users    | Ramp-up | Runtime | TTL   | Screenshot             |
+| # | Test Name                    | What It Validates          | Seats | Users    | Ramp-up | Runtime | TTL   | Screenshot              |
 |---|------------------------------|----------------------------|-------|----------|---------|---------|-------|-------------------------|
 | 1 | Lock Contention              | Mutual exclusion           | A1    | 50       | 1/sec   | 2m      | 120s  | ![](./assets/test1.png) |
 | 2 | Lock TTL Expiry              | Lock auto-release          | A1    | 50       | 1/sec   | 1m      | 5s    | ![](./assets/test2.png) |
@@ -190,18 +139,3 @@ A high failure rate is expected and desired.
 | 5 | Confirm Race (Multi-seat)    | Atomic commit              | A2,A3 | 20       | 5/sec   | 1m      | 1s    | ![](./assets/test5.png) |
 
 
----
-
-## Key Engineering Takeaways
-
-- Redis is not trusted with correctness
-
-- DB constraints are non-negotiable
-
-- Idempotency must be designed, not assumed
-
-- Returning from inside DB transactions is dangerous
-
-- Load testing reveals bugs unit tests never will
-
-- High failure rate ≠ broken system
